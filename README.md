@@ -71,6 +71,8 @@ If you are using the pretrained model, then you will need to update the path to 
 python eval.py --g_model_path save/gen_best.pth --infos_path save/infos.pkl  --sample_max 1 --id $id --beam_size $beam_size --input_json LSMDC16_info_someone.json --input_fc_dir feats/i3d/ --input_img_dir feats/resnet152/ --input_label_h5 LSMDC16_labels_someone.h5
 ```
 
+To run on the blind test split, simply add `--split blind_test` option.
+
 The captions will be saved in `movie_eval/captions/caption_$id.json` and results in `movie_eval/results/result_$id.json`
 
 ## Reference
