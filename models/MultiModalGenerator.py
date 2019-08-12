@@ -13,7 +13,7 @@ from .Attention import Attention
 import numpy as np
 import time
 
-
+#
 class MultiModalGenerator(CaptionModel):
     def __init__(self, opt):
         super(MultiModalGenerator, self).__init__()

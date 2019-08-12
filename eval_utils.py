@@ -16,7 +16,7 @@ import misc.utils as utils
 import subprocess
 from six.moves import cPickle
 import time
-
+#
 def extend_paragraph(sent_num,par_score):
     new_score = par_score.new(sum(sent_num)).zero_()
     m = 0
