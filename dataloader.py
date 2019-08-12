@@ -18,6 +18,22 @@ def zero_pad(features,n_feat):
         features = np.vstack((features,np.zeros((n_feat - features.shape[0], features.shape[1]))))
     return features
 
+# https://stackoverflow.com/questions/25200220/generate-a-random-derangement-of-a-list
+def random_derangement(n):
+    if n == 0 or n == 1:
+        return n
+    while True:
+        v = range(n)
+        for j in range(n - 1, -1, -1):
+            p = random.randint(0, j)
+            if v[p] == j:
+                break
+            else:
+                v[j], v[p] = v[p], v[j]
+        else:
+            if v[0] != 0:
+                return v
+
 class DataLoader(data.Dataset):
 
     def reset_iterator(self, split):
@@ -220,7 +236,8 @@ class DataLoader(data.Dataset):
             img_batch[i,:sent_num] = tmp_fcs[1]
             box_batch[i,:sent_num] = tmp_fcs[2]
             sent_num_batch[i] = sent_num
-            label_batch[i,:sent_num] = self.get_label_batch(ix)
+            if split != 'blind_test':
+                label_batch[i,:sent_num] = self.get_label_batch(ix)
 
             if tmp_wrapped:
                 wrapped = True
