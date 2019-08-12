@@ -3,7 +3,7 @@ import argparse
 def parse_opt():
     parser = argparse.ArgumentParser()
     # Data input settings
-    parser.add_argument('--input_json', type=str, default='data/video_data_dense_label.json',
+    parser.add_argument('--input_json', type=str,
                     help='path to the json file containing additional info and vocab (img/video)')
     parser.add_argument('--input_fc_dir', type=str,
                         help='path to the directory containing the preprocessed fc video features')
@@ -11,7 +11,7 @@ def parse_opt():
                         help='path to the directory containing the image features')
     parser.add_argument('--input_box_dir', type=str,
                     help='path to the directory containing the boxes of att img feats (img)')
-    parser.add_argument('--input_label_h5', type=str, default='data/video_data_dense_label.h5',
+    parser.add_argument('--input_label_h5', type=str,
                     help='path to the h5file containing the preprocessed dataset (img/video)')
 
     parser.add_argument('--g_start_from', type=str, default=None,
@@ -23,49 +23,29 @@ def parse_opt():
     parser.add_argument('--g_start_epoch', type=str, default="latest",
                      help="""start training generator at epoch (int, latest, latest_ce, latest_scst)
                      """)
-    parser.add_argument('--d_start_from', type=str, default=None,
-                    help="""skip pre training step and continue training from saved discrimiator model at this path.
-                          for now, assumes that generator has been loaded as well. (Note generator's infos.pkl will be used)
-                          'infos_{id}.pkl'         : configuration;
-                          'dis_optimizer_{epoch}.pth'     : optimizer;
-                          'dis_{epoch}.pth'         : model
-                    """)
-    parser.add_argument('--d_start_epoch', type=str, default="latest",
-                     help="""start training discriminator at epoch (int, latest)
-                     """)
     parser.add_argument('--cached_tokens', type=str, default='coco-train-idxs',
                     help='Cached token file for calculating cider score during self critical training.')
 
     # Model settings
     parser.add_argument('--caption_model', type=str, default="video",
                     help='fc, show_tell, adaatt, topdown, s2vt, paragraph show_attend_tell, all_img, att2in, att2in2, att2all2,  stackatt, denseatt')
+    parser.add_argument('--g_context_epoch', type=int, default=10,
+                        help='epoch to start incorporating context for generator (-1 = dont use context)')
     parser.add_argument('--rnn_size', type=int, default=512,
-                    help='size of the rnn in number of hidden nodes in each layer')
-    parser.add_argument('--d_rnn_size', type=int, default=512,
                     help='size of the rnn in number of hidden nodes in each layer')
     parser.add_argument('--num_layers', type=int, default=1,
                     help='number of layers in the RNN')
     parser.add_argument('--rnn_type', type=str, default='lstm',
                     help='rnn, gru, or lstm')
-    parser.add_argument('--video_encoding_size', type=int, default=256,
-                    help='the encoding size of each frame of c3d features.')
-    parser.add_argument('--d_video_encoding_size', type=int, default=256,
-                    help='the encoding size of each frame of c3d features.')
     parser.add_argument('--input_encoding_size', type=int, default=512,
                     help='the encoding size of each token in the vocabulary, and the image.')
-    parser.add_argument('--d_input_encoding_size', type=int, default=512,
-                    help='the encoding size of each token in the vocabulary, and the image.')
-    parser.add_argument('--att_hid_size', type=int, default=512,
-                    help='the hidden size of the attention MLP; only useful in show_attend_tell; 0 if not using hidden layer')
     parser.add_argument('--fc_feat_size', type=int, default=1024,
                     help='1024 for i3d, 2048 for resnet, 4096 for vgg (img) \
                           500  for c3d,    8192 for r3d (video')
     parser.add_argument('--img_feat_size', type=int, default=2048,
                         help='img feat size')
-    parser.add_argument('--box_feat_size', type=int, default=8473,
+    parser.add_argument('--box_feat_size', type=int, default=15461,
                         help='box feat size')
-    parser.add_argument('--att_feat_size', type=int, default=2048,
-                    help='2048 for resnet, 512 for vgg')
     parser.add_argument('--logit_layers', type=int, default=1,
                     help='number of layers in the RNN')
     parser.add_argument('--use_bn', type=int, default=0,
@@ -78,62 +58,13 @@ def parse_opt():
                         help='use resnet features specified in input_img_dir')
     parser.add_argument('--use_box', type=int, default=0,
                         help='use bottomup features sepcified in input_box_dir')
-
-    # discriminator input settings
-    parser.add_argument('--use_bow', type=int, default=1,
-                        help='use bag of words for visual discriminator; otherwise, use lstm')
-    parser.add_argument('--glove', type=str, default=None,
-                        help='text or npy containing glove vector associated with word_idx labels. \
-                             builds a npy file in the same directory if text file is given')
-
-    # video options
-    parser.add_argument('--feat_type', type=str, default='resnext101-64f',
-                        help='feat type for video (c3d, resnext101-64f)')
-    parser.add_argument('--g_context_epoch', type=int, default=10,
-                        help='epoch to start incorporating context for generator (-1 = dont use context)')
-    parser.add_argument('--d_context_epoch', type=int, default=0,
-                        help='epoch to start incorporating context for discriminator (-1 = dont use context)')
-    parser.add_argument('--use_activity_labels', type=int, default=0,
-                        help='make captioning model use activity label as additional feature')
-    parser.add_argument('--d_use_activity_labels', type=int, default=0,
-                        help='make discriminator use activity label as additional feature')
-    parser.add_argument('--activity_encoding_size', type=int, default=50,
-                        help='encoding size of activity labels to feed into rnn. should set lte activity label size (200).')
-    parser.add_argument('--context_encoding_size', type=int, default=50,
-                        help='size to encode last hidden lstm state')
-    parser.add_argument('--negatives', type=str, default='random',
-                        help='option for mismatched (video,caption) pair for discriminator. \
-                              random: random caption      \
-                              hard: different video with same activity')
-
-    # video disc option
-    parser.add_argument('--visual_weight', type=float, default=1.0,
-                        help='weight to visual discriminator reward')
-    parser.add_argument('--lang_weight', type=float, default=1.0,
-                        help='weight to lang discriminator reward')
-    parser.add_argument('--pair_weight', type=float, default=1.0,
-                        help='weight to paragraph discriminator reward')
-    parser.add_argument('--ce_weight', type=float, default=0,
-                        help='add ce loss during self-critical training')
-
-    # dataloading option
-    parser.add_argument('--use_mean', type=int, default=0)
-    parser.add_argument('--random_nfeat', type=int, default=20)
-    parser.add_argument('--max_seg', type=int, default=3)
-    parser.add_argument('--box_seg', type=int, default=3)
-    parser.add_argument('--max_sent_num', type=int, default=5)
-
-
-    # feature manipulation
-    parser.add_argument('--norm_att_feat', type=int, default=0,
-                    help='If normalize attention features')
-    # parser.add_argument('--use_box', type=int, default=0,
-    #                 help='If use box features')
-    parser.add_argument('--norm_box_feat', type=int, default=0,
-                    help='If use box, do we normalize box feature')
+    parser.add_argument('--max_seg', type=int, default=3,
+                        help='number of segments to divide the temporal visual features')
+    parser.add_argument('--max_sent_num', type=int, default=5,
+                        help='max number of sentences per group (LSMDC has a group of 5 clips)')
 
     # Optimization: General
-    parser.add_argument('--g_pre_nepoch', type=int, default=50,
+    parser.add_argument('--g_pre_nepoch', type=int, default=80,
                     help='number of epochs to pre-train generator with cross entropy')
     parser.add_argument('--batch_size', type=int, default=16,
                     help='minibatch size')
@@ -141,12 +72,6 @@ def parse_opt():
                     help='clip gradients at this value')
     parser.add_argument('--drop_prob_lm', type=float, default=0.5,
                     help='strength of dropout in the Language Model RNN')
-    parser.add_argument('--self_critical_after', type=int, default=-1,
-                    help='After what epoch do we start finetuning the CNN? (-1 = disable; never finetune, 0 = finetune from start)')
-    parser.add_argument('--seq_per_img', type=int, default=5,
-                    help='number of captions to sample for each image during training. Done for efficiency since CNN forward pass is expensive. E.g. coco has 5 sents/image')
-    parser.add_argument('--beam_size', type=int, default=1,
-                    help='used when sample_max = 1, indicates number of beams in beam search. Usually 2 or 3 works well. More is not better. Set this to 1 for faster runtime but a bit worse performance.')
 
     # Optimization: for the Language Model
     parser.add_argument('--optim', type=str, default='adam',
@@ -194,50 +119,6 @@ def parse_opt():
                     help='Evaluate language as well (1 = yes, 0 = no)? BLEU/CIDEr/METEOR/ROUGE_L? requires coco-caption code from Github.')
     parser.add_argument('--load_best_score', type=int, default=1,
                     help='Do we load previous best score when resuming training.')
-
-    # Sampling
-    parser.add_argument('--temperature', type=float, default=1.0,
-                        help='temperature when sampling from distributions (i.e. when sample_max = 0). Lower = "safer" predictions.')
-    parser.add_argument('--train_temperature', type=float, default=1.0,
-                        help='temperature when sampling from distributions to train the discriminator.')
-    parser.add_argument('--dynamic_temperature', action='store_true',
-                        help='use temperature from range [1.0, 0.8, 0.6, 0.4, 0.2] alternatively')
-
-    # Reward
-    parser.add_argument('--cider_reward_weight', type=float, default=0,
-                    help='The reward weight from cider')
-    parser.add_argument('--gan_reward_weight', type=float, default=1,
-                    help='The reward weight from gan')
-    parser.add_argument('--meteor_reward_weight', type=float, default=0,
-                    help='The reward weight from meteor')
-
-    # Discriminator
-    parser.add_argument('--dis_model', type=str, default="joint_embed",
-                    help='joint_embed, co_att, fc, fc_video, s2vt')
-
-    parser.add_argument('--d_pre_nepoch', type=int, default=10,
-                    help='number of epochs to pre-train discriminator')
-    parser.add_argument('--g_steps', type=int, default=1,
-                    help='number of steps updating generator')
-    parser.add_argument('--d_steps', type=int, default=1,
-                    help='number of steps updating discriminator')
-    parser.add_argument('--d_gen_weight', type=float, default=0.5,
-                    help='weight on generated sent loss for discriminator')
-    parser.add_argument('--d_mm_weight', type=float, default=0.5,
-                    help='weight on mismatched sent loss for discriminator')
-    parser.add_argument('--d_bidirectional', type=int, default=1,
-                    help='use bidirectional lstm for discriminator')
-    parser.add_argument('--transfer_embeddings', type=int, default=1,
-                        help='transfer visual embddings from generator')
-    # parser.add_argument('--gan', type=int, default=1,
-    #                     help='train with gan (1 = yes, 0 = no)?')
-
-
-    # misc
-    parser.add_argument('--id', type=str, default='',
-                    help='an id identifying this run/job. used in cross-val and appended when writing progress files')
-    parser.add_argument('--train_only', type=int, default=0,
-                    help='if true then use 80k, else use 110k')
 
     args = parser.parse_args()
 
