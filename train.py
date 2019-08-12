@@ -174,7 +174,7 @@ def train(opt):
                                'dataset': opt.input_json,
                                'sample_max' : 1,
                                'language_eval': opt.language_eval,
-                               'id' : opt.id,
+                               'id' : opt.val_id,
                                'val_videos_use' : opt.val_videos_use,
                                'remove' : 1} # remove generated caption
                 # eval_kwargs.update(vars(opt))

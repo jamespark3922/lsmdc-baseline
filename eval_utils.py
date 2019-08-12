@@ -34,6 +34,7 @@ def language_eval_video(preds, model_id, split, diversity_dict, remove=False):
     sys.path.append("movie_eval")
     results = []
     id = 1
+    output = {}
     for pred in preds:
         sent = ' '.join([word for word in pred['caption'].split() if word != '<UNK>'])
         info = {'video_id': id, 'caption' : sent}
@@ -46,22 +47,23 @@ def language_eval_video(preds, model_id, split, diversity_dict, remove=False):
     with open(os.path.join('movie_eval', 'captions', 'caption_' + model_id + '.json'), 'w') as f:
         json.dump(results, f)
         f.close()
-    eval_command = ["python","evaluate.py", "-s",'captions/caption_' + model_id + '.json',
-                    "-o", 'results/result_' + model_id + '.json', "-r", ref_path, '--verbose']
-    print(eval_command)
-    subprocess.call(eval_command,cwd='movie_eval')
 
-    # update and write with diversity statistics
-    with open(os.path.join('movie_eval', 'results','result_' + model_id + '.json'),'r') as f:
-        output = json.load(f)
-        output.update(diversity_dict)
-        f.close()
-    with open(os.path.join('movie_eval', 'results','result_' + model_id + '.json'),'w') as f:
-        json.dump(output,f)
-        f.close()
-    if remove: # remove for validation
-        os.remove(os.path.join('movie_eval','captions','caption_' + model_id + '.json'))
-        os.remove(os.path.join('movie_eval','results','result_' + model_id + '.json'))
+    if split != 'blind_test':
+        eval_command = ["python","evaluate.py", "-s",'captions/caption_' + model_id + '.json',
+                        "-o", 'results/result_' + model_id + '.json', "-r", ref_path, '--verbose']
+        subprocess.call(eval_command,cwd='movie_eval')
+
+        # update and write with diversity statistics
+        with open(os.path.join('movie_eval', 'results','result_' + model_id + '.json'),'r') as f:
+            output = json.load(f)
+            output.update(diversity_dict)
+            f.close()
+        with open(os.path.join('movie_eval', 'results','result_' + model_id + '.json'),'w') as f:
+            json.dump(output,f)
+            f.close()
+        if remove: # remove for validation
+            os.remove(os.path.join('movie_eval','captions','caption_' + model_id + '.json'))
+            os.remove(os.path.join('movie_eval','results','result_' + model_id + '.json'))
     return output
 
 def bigram(sent):
