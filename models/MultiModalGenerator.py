@@ -49,7 +49,6 @@ class MultiModalGenerator(CaptionModel):
         # box features
         self.use_box = opt.use_box
         self.box_feat_size = opt.box_feat_size
-        self.box_seg = opt.box_seg
         if self.use_box:
             self.box_embed = nn.Linear(self.box_feat_size, self.rnn_size)
             self.box_attention = Attention(self.rnn_size)

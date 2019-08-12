@@ -37,8 +37,12 @@ def parse_opt():
                     help='number of layers in the RNN')
     parser.add_argument('--rnn_type', type=str, default='lstm',
                     help='rnn, gru, or lstm')
+    parser.add_argument('--video_encoding_size', type=int, default=256,
+                        help='the encoding size of each frame of visual features.')
     parser.add_argument('--input_encoding_size', type=int, default=512,
                     help='the encoding size of each token in the vocabulary, and the image.')
+    parser.add_argument('--feat_type', type=str, default='i3d',
+                        help='feat type for video (i3d, c3d, resnext101-64f)')
     parser.add_argument('--fc_feat_size', type=int, default=1024,
                     help='1024 for i3d, 2048 for resnet, 4096 for vgg (img) \
                           500  for c3d,    8192 for r3d (video')
@@ -50,6 +54,9 @@ def parse_opt():
                     help='number of layers in the RNN')
     parser.add_argument('--use_bn', type=int, default=0,
                     help='If 1, then do batch_normalization first in att_embed, if 2 then do bn both in the beginning and the end of att_embed')
+    parser.add_argument('--glove', type=str, default=None,
+                        help='text or npy containing glove vector associated with word_idx labels. \
+                                 builds a npy file in the same directory if text file is given')
 
     # input settings
     parser.add_argument('--use_video', type=int, default=1,
@@ -62,6 +69,7 @@ def parse_opt():
                         help='number of segments to divide the temporal visual features')
     parser.add_argument('--max_sent_num', type=int, default=5,
                         help='max number of sentences per group (LSMDC has a group of 5 clips)')
+    parser.add_argument('--use_mean', type=int, default=0)
 
     # Optimization: General
     parser.add_argument('--g_pre_nepoch', type=int, default=80,
@@ -128,12 +136,9 @@ def parse_opt():
     assert args.input_encoding_size > 0, "input_encoding_size should be greater than 0"
     assert args.batch_size > 0, "batch_size should be greater than 0"
     assert args.drop_prob_lm >= 0 and args.drop_prob_lm < 1, "drop_prob_lm should be between 0 and 1"
-    assert args.seq_per_img > 0, "seq_per_img should be greater than 0"
-    assert args.beam_size > 0, "beam_size should be greater than 0"
     assert args.losses_log_every > 0, "losses_log_every should be greater than 0"
     assert args.language_eval == 0 or args.language_eval == 1, "language_eval should be 0 or 1"
     assert args.load_best_score == 0 or args.load_best_score == 1, "language_eval should be 0 or 1"
-    assert args.train_only == 0 or args.train_only == 1, "language_eval should be 0 or 1"
     assert args.save_checkpoint_every >= 0, "saving checkpoint at every $epoch should be non-negative"
 
     return args

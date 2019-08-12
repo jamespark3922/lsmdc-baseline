@@ -174,11 +174,9 @@ def eval_split(gen_model, crit, loader, eval_kwargs={}):
         data = loader.get_batch(split)
         n = n + loader.batch_size
 
-        tmp = [data['fc_feats'], data['img_feats'], data['box_feats'], data['labels'], data['masks'],
-               data['mm_fc_feats'], data['mm_img_feats'], data['mm_box_feats'], data['mm_labels']]
+        tmp = [data['fc_feats'], data['img_feats'], data['box_feats'], data['labels'], data['masks']]
         tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
-        fc_feats, img_feats, box_feats, labels, masks, \
-        mm_fc_feats, mm_img_feats, mm_box_feats, mm_labels = tmp
+        fc_feats, img_feats, box_feats, labels, masks, = tmp
         sent_num = data['sent_num']
 
         torch.manual_seed(seed)
@@ -234,17 +232,14 @@ def eval_split(gen_model, crit, loader, eval_kwargs={}):
 
         seq = utils.align_seq(sent_num,seq)
         labels = utils.align_seq(sent_num,labels)
-        mm_labels = utils.align_seq(sent_num, mm_labels)
         gt = utils.decode_sequence(loader.get_vocab(),labels[:,1:-1].data)
-        mm = utils.decode_sequence(loader.get_vocab(), mm_labels[:,1:-1].data)
         seq = seq.data
 
         # print and store actual decoded sentence
         sents = utils.decode_sequence(loader.get_vocab(), seq)
         for k, sent in enumerate(sents):
             entry = {'video_id': data['infos'][k]['id'], 'caption': sent.encode('ascii', 'ignore').replace(" 's", "'s"),
-                     'group_id' : data['infos'][k]['g_index'], 'gt' : gt[k].encode('ascii','ignore'), 'mm' : mm[k].encode('ascii','ignore'),
-                     }
+                     'group_id' : data['infos'][k]['g_index'], 'gt' : gt[k].encode('ascii','ignore')}
 
             predictions.append(entry)
 

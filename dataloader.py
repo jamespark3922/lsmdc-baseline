@@ -87,10 +87,7 @@ class DataLoader(data.Dataset):
 
         self.h5_label_file = h5py.File(self.opt.input_label_h5, 'r')
         self.labels = self.h5_label_file['labels'].value
-
         self.max_seg = opt.max_seg
-        self.mean = opt.use_mean
-        self.negatives = opt.negatives
 
         # separate out indexes for each of the provided splits
         self.split_ix = {'train': [], 'val': [], 'test': [], 'blind_test': []}
@@ -229,13 +226,6 @@ class DataLoader(data.Dataset):
         label_batch = np.zeros((batch_size, self.max_sent_num, self.seq_length), dtype='int')
         mask_batch = np.zeros((batch_size, self.max_sent_num, self.seq_length), dtype='float32')
 
-        # negative inputs for discriminator
-        mm_fc_batch = np.zeros([batch_size, self.max_sent_num, self.max_seg, self.opt.fc_feat_size], dtype = 'float32')
-        mm_img_batch = np.zeros([batch_size, self.max_sent_num, self.max_seg, self.opt.img_feat_size], dtype = 'float32')
-        mm_box_batch = np.zeros([batch_size, self.max_sent_num, self.nbox, self.opt.box_feat_size], dtype = 'float32')
-        mm_label_batch = np.zeros((batch_size, self.max_sent_num, self.seq_length), dtype = 'int')
-        mm_mask_batch = np.zeros((batch_size, self.max_sent_num, self.seq_length), dtype='float32')
-
         wrapped = False
         infos = []
         for i in range(batch_size):
@@ -247,38 +237,6 @@ class DataLoader(data.Dataset):
             box_batch[i,:sent_num] = tmp_fcs[2]
             sent_num_batch[i] = sent_num
             label_batch[i,:sent_num] = self.get_label_batch(ix)
-
-            # get visually mismatched (mm) captions and features for discriminator
-            if self.negatives == 'video' and sent_num > 1:
-                dl = random_derangement(sent_num)
-                mm_label_batch[i, :sent_num] = label_batch[i,dl]
-                mm_fc_batch[i, :sent_num] = fc_batch[i,dl]
-                mm_img_batch[i, :sent_num] = img_batch[i,dl]
-                mm_box_batch[i, :sent_num] = box_batch[i,dl]
-
-            elif self.negatives in ['movie', 'video']:  # get caption from the same movie (hard negatives)
-                movie = self.groups[ix]['movie']
-                m = 0
-                while True:
-                    m_ix = random.choice(self.movie_dict[movie]) # get random group index in the movie
-                    n = min(sent_num - m, self.get_sent_num(m_ix))
-                    if self.groups[m_ix] != ix:  # avoid getting the gt pair
-                        mm_label_batch[i, m:m + n] = self.get_label_batch(m_ix)[:n]
-                        mm_fc_batch[i, m:m + n] = self.get_seg_batch(m_ix, "video")[:n] if self.use_video else None
-                        mm_img_batch[i, m:m + n] = self.get_seg_batch(m_ix, "img")[:n] if self.use_img else None
-                        mm_box_batch[i, m:m + n] = self.get_box_batch(m_ix)[:n] if self.use_box else None
-                        m += n
-                    if m >= sent_num:
-                        break
-            else:  # get random caption (random negatives)
-                while True:
-                    mmix = random.randint(0, len(self.split_ix[split]) - 1)
-                    if self.groups[mmix] != ix and sent_num <= self.get_sent_num(mmix):  # avoid getting the gt pair
-                        mm_label_batch[i, :sent_num, :self.seq_length] = self.get_label_batch(mmix)[:sent_num]
-                        mm_fc_batch[i, :sent_num] = self.get_seg_batch(mmix, "video")[:sent_num] if self.use_video else None
-                        mm_img_batch[i, :sent_num] = self.get_seg_batch(mmix, "img")[:sent_num] if self.use_img else None
-                        mm_box_batch[i, :sent_num] = self.get_box_batch(mmix)[:sent_num] if self.use_box else None
-                        break
 
             if tmp_wrapped:
                 wrapped = True
@@ -296,12 +254,6 @@ class DataLoader(data.Dataset):
                 if ix < sent_num:
                     row[:nonzeros[ix]] = 1
 
-            # generate mismatch mask
-            nonzeros = np.array(list(map(lambda x: (x != 0).sum()+2, mm_label_batch[i])))
-            for ix, row in enumerate(mm_mask_batch[i]):
-                if ix < sent_num:
-                    row[:nonzeros[ix]] = 1
-
         data = {}
 
         data['fc_feats'] = fc_batch
@@ -309,12 +261,6 @@ class DataLoader(data.Dataset):
         data['box_feats'] = box_batch
         data['labels'] = label_batch
         data['masks'] = mask_batch
-
-        data['mm_fc_feats'] = mm_fc_batch
-        data['mm_img_feats'] = mm_img_batch
-        data['mm_box_feats'] = mm_box_batch
-        data['mm_labels'] = mm_label_batch
-        data['mm_masks'] = mm_mask_batch
 
         data['sent_num'] = sent_num_batch
         data['bounds'] = {'it_pos_now': self.iterators[split], 'it_max': len(self.split_ix[split]), 'wrapped': wrapped}
