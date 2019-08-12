@@ -42,7 +42,7 @@ def language_eval_video(preds, model_id, split, diversity_dict, remove=False):
     if remove:
         model_id += id_generator() # to avoid processing and removing same ids
     split_ = split if split != "blind_test" else "blindtest"
-    ref_path = os.path.join("data", "LSMDC16_annos_%s.csv" % split_)
+    ref_path = os.path.join("data", "LSMDC16_annos_%s_someone.csv" % split_)
     with open(os.path.join('movie_eval', 'captions', 'caption_' + model_id + '.json'), 'w') as f:
         json.dump(results, f)
         f.close()
