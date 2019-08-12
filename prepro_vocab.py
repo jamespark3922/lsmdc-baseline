@@ -12,7 +12,7 @@ def build_vocab(params):
     # count up the number of words
     counts = {}
     max_len = []
-    csvs = ['LSMDC16_annos_training_someone.csv', 'LSMDC16_annos_val_someone.csv', 'LSMDC16_annos_test_someone.csv'] #  'LSMDC16_annos_blindtest.csv']
+    csvs = ['LSMDC16_annos_training_someone.csv', 'LSMDC16_annos_val_someone.csv', 'LSMDC16_annos_test_someone.csv', 'LSMDC16_annos_blindtest.csv']
     for c in csvs[:-1]:
         with open(os.path.join(params['input_path'], c)) as csv_file:
             csv_reader = csv.reader(csv_file,delimiter='\t')
@@ -120,7 +120,7 @@ def main(params):
     itow[1] = '<sos>'
 
     labels, ll = build_label(params,videos,wtoi)
-    f_lb = h5py.File("LSMDC16_labels.h5","w")
+    f_lb = h5py.File("LSMDC16_labels_someone.h5","w")
     f_lb.create_dataset("labels", dtype='uint32', data=labels)
     f_lb.create_dataset("label_length", dtype='uint32', data=ll)
 
@@ -131,7 +131,7 @@ def main(params):
     out['groups'] = groups
     out['movie_ids'] = movie_ids
     out['max_seq_length'] = params['max_length']
-    json.dump(out, open('LSMDC16_info.json', 'w'))
+    json.dump(out, open('LSMDC16_info_someone.json', 'w'))
 
 
 if __name__ == "__main__":
