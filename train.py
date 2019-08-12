@@ -38,7 +38,7 @@ def add_summary_value(writer, key, value, iteration):
 def train(opt):
     # tb_summary_writer = tb and tb.SummaryWriter(opt.checkpoint_path)
     if not os.path.exists(opt.checkpoint_path):
-        os.mkdirs(opt.checkpoint_path)
+        os.mkdir(opt.checkpoint_path)
 
     with open(os.path.join(opt.checkpoint_path,'config.json'),'w') as f:
         json.dump(vars(opt),f)
