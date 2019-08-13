@@ -7,7 +7,6 @@ This code is written in pytorch and is based on [adv-inf](https://github.com/jam
 ## Requirements
 Python 2.7 (because there is no [coco-caption](https://github.com/tylin/coco-caption) version for python 3)  
 PyTorch 0.4       
-[movie_eval](https://github.com/jamespark3922/movie_eval) (for evaluation but downloaded recursively)  
 [coco-caption](https://github.com/tylin/coco-caption) (located in movie_eval; run `./get_stanford_models.sh` to set up SPICE evaluation)
 
 Clone the repository recursively to get the submodules.
@@ -53,9 +52,13 @@ You can see more details in `opts.py`
 
 ## Pretrained Model
 
-We share pretrained models here.
+We share pretrained models [here](https://drive.google.com/drive/u/0/folders/19epC22JhlcMx7DZU82OqAVbgfCmTs38Y).
 
-The results compared to previous challenge submissions in public test set are: 
+Result for the public test set is:
+
+|                       | CIDER         | METEOR       | BLEU-4       | SPICE 
+| -------------         | ------------- |------------- |------------- | ------------- 
+| gen_43.pth (ep 43)    | 0.115         | 0.082         | 0.012         | 0.152
 
 ## Evaluation
 After training is done, one can evaluate the captions in the public test set.
