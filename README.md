@@ -60,7 +60,7 @@ Result for the public test set is:
 | -------------         | ------------- |------------- |------------- | ------------- 
 | gen_43.pth (ep 43)    | 0.115         | 0.082         | 0.012         | 0.152
 
-(Note that METEOR score is a big higher than previous 2017 challenge submissions, becaue the captions are updated for the current version).
+(Note that METEOR score is a bit higher than previous 2017 challenge submissions, becaue captions have been updated for the current version).
 
 ## Evaluation
 After training is done, one can evaluate the captions in the public test set.
