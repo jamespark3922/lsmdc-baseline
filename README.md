@@ -1,6 +1,6 @@
 # Baseline for Large Scale Movie Description Challenge
 
-A baseline code for LSMDC19 Task 1 "Multi Sentence Video Description". 
+A baseline code for LSMDC19 Task 1: "Multi Sentence Video Description". 
 
 This code is written in pytorch and is based on [adv-inf](https://github.com/jamespark3922/adv-inf) and [self-critical.pytorch](https://github.com/ruotianluo/self-critical.pytorch) repositories.
 
