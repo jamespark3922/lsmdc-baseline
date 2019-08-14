@@ -83,12 +83,12 @@ The captions will be saved in `movie_eval/captions/caption_$id.json` and results
 ## Reference
 
 ```
-@article{rohrbach2015movie,
-  title= A Dataset for Movie Description,
-  author={Rohrbach, Anna and Rohrbach, Marchus and Tandon, and Schiele, Bernt},
-  jorunal={CVPR 2015},
-  year={2015}
-}
+@article{lsmdc,
+author = {Rohrbach, Anna and Torabi, Atousa and Rohrbach, Marcus and Tandon, Niket and  Pal, Chris and Larochelle, Hugo and Courville, Aaron and Schiele, Bernt},
+title = {Movie Description},
+journal={International Journal of Computer Vision},
+year = {2017},
+url = {http://link.springer.com/article/10.1007/s11263-016-0987-1?wt_mc=Internal.Event.1.SEM.ArticleAuthorOnlineFirst}}
 
 @article{park2019advinf,
   title= Adversarial Inference for Multi-Sentence Video Descriptions,
