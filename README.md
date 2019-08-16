@@ -58,7 +58,7 @@ Result for the public test set is:
 
 |                       | CIDER         | METEOR       | BLEU-4       | SPICE 
 | -------------         | ------------- |------------- |------------- | ------------- 
-| gen_43.pth (ep 43)    | 0.115         | 0.082         | 0.012         | 0.152
+| gen_60.pth (ep 60)    | 0.119         | 0.0825        | 0.013         | 0.151
 
 (Note that METEOR score is a bit higher than previous 2017 challenge submissions, becaue captions have been updated for the current version).
 
@@ -73,7 +73,7 @@ You can also do random sampling by setting `--sample_max 0` and specifying `--to
 
 If you are using the pretrained model, then you will need to update the path to your input files.
 ```angular2html
-python eval.py --g_model_path save/gen_best.pth --infos_path save/infos.pkl  --sample_max 1 --id $id --beam_size $beam_size --input_json LSMDC16_info_someone.json --input_fc_dir feats/i3d/ --input_img_dir feats/resnet152/ --input_label_h5 LSMDC16_labels_someone.h5
+python eval.py --g_model_path save/gen_60.pth --infos_path save/infos.pkl  --sample_max 1 --id $id --beam_size $beam_size --input_json LSMDC16_info_someone.json --input_fc_dir feats/i3d/ --input_img_dir feats/resnet152/ --input_label_h5 LSMDC16_labels_someone.h5
 ```
 
 To run on the blind test split, simply add `--split blind_test` option.
